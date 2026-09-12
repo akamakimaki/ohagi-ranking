@@ -617,7 +617,18 @@
         const dropTab =
             document.getElementById("dropTab");
 
-        let currentGame = "escape";
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const mineView =
+            params.get("view") === "mine";
+
+        let currentGame =
+            params.get("game") === "drop"
+                ? "drop"
+                : "escape";
 
         function formatScore(game, score) {
 
@@ -654,7 +665,12 @@
 
                 const response =
                     await fetch(
-                        `/api/ranking?game=${game}`
+                        mineView
+                            ? `/api/my-scores?game=${game}`
+                            : `/api/ranking?game=${game}`,
+                        {
+                            credentials: "include"
+                        }
                     );
 
                 if (!response.ok) {
@@ -667,7 +683,18 @@
                     await response.json();
 
                 const ranking =
-                    data.ranking;
+                    mineView
+                        ? data.scores
+                            .slice()
+                            .sort(
+                                (a, b) =>
+                                    b.score - a.score
+                            )
+                            .map(entry => ({
+                                ...entry,
+                                name: "自分"
+                            }))
+                        : data.ranking;
 
                 if (ranking.length === 0) {
 
