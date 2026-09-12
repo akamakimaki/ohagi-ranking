@@ -459,27 +459,34 @@
 
         @media (max-width: 520px) {
             .title-board {
-                grid-template-columns: 92px minmax(0, 1fr) 92px;
+                grid-template-columns: 72px minmax(0, 1fr) 72px;
                 min-height: 112px;
                 padding: 8px 0 10px;
             }
 
             .title-character {
-                width: 88px;
-                max-height: 98px;
+                width: 74px;
+                max-height: 88px;
             }
 
             .character-wrap {
-                width: 90px;
-                height: 100px;
+                width: 76px;
+                height: 92px;
+            }
+
+            .title-copy {
+                width: 100%;
+                min-width: 0;
             }
 
             .title-main {
-                font-size: 29px;
+                font-size: clamp(22px, 6.2vw, 25px);
             }
 
             .title-sub {
-                font-size: 9px;
+                margin-top: 34px;
+                font-size: 8px;
+                letter-spacing: 0.22em;
             }
 
 
