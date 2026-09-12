@@ -2,11 +2,20 @@ const express = require("express");
 const Database = require("better-sqlite3");
 const cors = require("cors");
 const path = require("path");
+const crypto = require("crypto");
 
 const app = express();
 const PORT = 3010;
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        "https://akamakimaki.github.io",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500"
+    ],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -21,6 +30,25 @@ db.exec(`
         name TEXT NOT NULL,
         score INTEGER NOT NULL,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS private_scores (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        did TEXT NOT NULL,
+        game TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS login_sessions (
+        token_hash TEXT PRIMARY KEY,
+        did TEXT NOT NULL,
+        expires_at INTEGER NOT NULL
     )
 `);
 
@@ -52,6 +80,85 @@ function normalizeScore(value) {
 
     return score;
 }
+
+function hashSessionToken(token) {
+    return crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+}
+
+function parseCookies(req) {
+    const cookies = {};
+
+    const header =
+        String(req.headers.cookie || "");
+
+    for (const part of header.split(";")) {
+        const index = part.indexOf("=");
+
+        if (index === -1) {
+            continue;
+        }
+
+        const key =
+            part.slice(0, index).trim();
+
+        const value =
+            part.slice(index + 1).trim();
+
+        if (key) {
+            cookies[key] =
+                decodeURIComponent(value);
+        }
+    }
+
+    return cookies;
+}
+
+function getLoggedInDid(req) {
+    const cookies =
+        parseCookies(req);
+
+    const token =
+        cookies.ohagi_session;
+
+    if (!token) {
+        return null;
+    }
+
+    const tokenHash =
+        hashSessionToken(token);
+
+    const row =
+        db.prepare(`
+            SELECT did
+            FROM login_sessions
+            WHERE token_hash = ?
+              AND expires_at > ?
+        `).get(
+            tokenHash,
+            Date.now()
+        );
+
+    return row?.did || null;
+}
+
+function requireLogin(req, res, next) {
+    const did =
+        getLoggedInDid(req);
+
+    if (!did) {
+        return res.status(401).json({
+            error: "login_required"
+        });
+    }
+
+    req.loginDid = did;
+
+    next();
+}
+
 
 app.get("/health", (req, res) => {
     res.json({
@@ -133,6 +240,105 @@ app.get("/api/ranking", (req, res) => {
     });
 });
 
+
+app.get(
+    "/api/me",
+    requireLogin,
+    (req, res) => {
+
+        res.json({
+            ok: true,
+            did: req.loginDid
+        });
+    }
+);
+
+app.post(
+    "/api/my-scores",
+    requireLogin,
+    (req, res) => {
+
+        const game =
+            req.body.game;
+
+        const score =
+            normalizeScore(
+                req.body.score
+            );
+
+        if (!allowedGames.has(game)) {
+            return res.status(400).json({
+                error: "invalid_game"
+            });
+        }
+
+        if (score === null) {
+            return res.status(400).json({
+                error: "invalid_score"
+            });
+        }
+
+        const result =
+            db.prepare(`
+                INSERT INTO private_scores (
+                    did,
+                    game,
+                    score
+                )
+                VALUES (?, ?, ?)
+            `).run(
+                req.loginDid,
+                game,
+                score
+            );
+
+        res.status(201).json({
+            ok: true,
+            id: result.lastInsertRowid
+        });
+    }
+);
+
+app.get(
+    "/api/my-scores",
+    requireLogin,
+    (req, res) => {
+
+        const game =
+            req.query.game;
+
+        if (!allowedGames.has(game)) {
+            return res.status(400).json({
+                error: "invalid_game"
+            });
+        }
+
+        const rows =
+            db.prepare(`
+                SELECT
+                    id,
+                    game,
+                    score,
+                    created_at
+                FROM private_scores
+                WHERE did = ?
+                  AND game = ?
+                ORDER BY
+                    created_at DESC
+                LIMIT 100
+            `).all(
+                req.loginDid,
+                game
+            );
+
+        res.json({
+            game,
+            scores: rows
+        });
+    }
+);
+
+
 import("./oauth.mjs")
     .then(({ oauthClient }) => {
 
@@ -211,6 +417,46 @@ import("./oauth.mjs")
                         await oauthClient.callback(
                             params
                         );
+
+                    const sessionToken =
+                        crypto
+                            .randomBytes(32)
+                            .toString("base64url");
+
+                    const tokenHash =
+                        hashSessionToken(
+                            sessionToken
+                        );
+
+                    const expiresAt =
+                        Date.now() +
+                        30 * 24 * 60 * 60 * 1000;
+
+                    db.prepare(`
+    INSERT INTO login_sessions (
+        token_hash,
+        did,
+        expires_at
+    )
+    VALUES (?, ?, ?)
+`).run(
+                        tokenHash,
+                        session.did,
+                        expiresAt
+                    );
+
+                    res.cookie(
+                        "ohagi_session",
+                        sessionToken,
+                        {
+                            httpOnly: true,
+                            secure: true,
+                            sameSite: "none",
+                            maxAge:
+                                30 * 24 * 60 * 60 * 1000,
+                            path: "/"
+                        }
+                    );
 
                     res.json({
                         ok: true,
