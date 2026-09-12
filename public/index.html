@@ -605,6 +605,10 @@
             </div>
         </section>
 
+        <button id="backToGameBtn" type="button" style="margin-top: 16px;">
+            ゲームに戻る
+        </button>
+
     </main>
 
     <script>
@@ -616,6 +620,9 @@
 
         const dropTab =
             document.getElementById("dropTab");
+
+        const backToGameBtn =
+            document.getElementById("backToGameBtn");
 
         const params =
             new URLSearchParams(
@@ -764,6 +771,16 @@
             "click",
             () => {
                 loadRanking("drop");
+            }
+        );
+
+        backToGameBtn.addEventListener(
+            "click",
+            () => {
+                window.location.href =
+                    currentGame === "drop"
+                        ? "https://akamakimaki.github.io/ohagi-drop/"
+                        : "https://akamakimaki.github.io/ohagi-escape/";
             }
         );
 
