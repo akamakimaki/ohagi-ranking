@@ -8,6 +8,7 @@ const PORT = 3010;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 const db = new Database(
     path.join(__dirname, "ranking.db")
