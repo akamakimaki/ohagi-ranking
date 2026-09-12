@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>おはぎランキング</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800;900&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -35,58 +37,310 @@
 
         .title-board {
             position: relative;
+            display: grid;
+            grid-template-columns: 145px minmax(0, 1fr) 145px;
+            align-items: center;
+            min-height: 140px;
+            padding: 4px 0 8px;
+        }
+
+        .character-wrap {
+            position: relative;
+            width: 135px;
+            height: 135px;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            min-height: 130px;
-            padding: 10px 118px 8px;
+            z-index: 2;
+        }
+
+        .character-wrap-left {
+            justify-self: start;
+        }
+
+        .character-wrap-right {
+            justify-self: end;
         }
 
         .title-character {
-            position: absolute;
-            bottom: -2px;
+            display: block;
             width: 128px;
-            max-height: 138px;
+            max-height: 132px;
             object-fit: contain;
-            z-index: 2;
             animation: title-bounce 0.7s ease-in-out infinite;
             transform-origin: center bottom;
         }
 
-        .title-character-left {
-            left: 18px;
+        .character-wrap-right .title-character {
+            animation-delay: 0.14s;
         }
 
-        .title-character-right {
-            right: 18px;
-            animation-delay: 0.14s;
+        .character-deco {
+            position: absolute;
+            z-index: 4;
+            pointer-events: none;
+            font-family: "M PLUS Rounded 1c", sans-serif;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        /* 義勇まわり */
+
+        .giyu-heart {
+            left: -15px;
+            top: 35px;
+            color: #f5a9ad;
+            font-size: 26px;
+            transform: rotate(-12deg);
+        }
+
+        .giyu-heart-right {
+            right: -6px;
+            top: 26px;
+            color: #f5a9ad;
+            font-size: 22px;
+            transform: rotate(12deg);
+        }
+
+        .giyu-spark {
+            right: 2px;
+            top: -8px;
+            color: #f6c85f;
+            font-size: 25px;
+            transform: rotate(8deg);
+        }
+
+        .giyu-motion {
+            left: -10px;
+            bottom: 16px;
+            color: #4b352c;
+            font-size: 24px;
+            transform: rotate(70deg);
+        }
+
+        /* 実弥まわり */
+
+        .sanemi-bang-top {
+            right: -2px;
+            top: 1px;
+            color: #f6c85f;
+            font-size: 27px;
+            transform: rotate(8deg);
+        }
+
+        .sanemi-bang-side {
+            right: -17px;
+            top: 43px;
+            color: #f6c85f;
+            font-size: 22px;
+            transform: rotate(14deg);
+        }
+
+        .sanemi-motion {
+            right: -9px;
+            bottom: 16px;
+            color: #4b352c;
+            font-size: 24px;
+            transform: rotate(-70deg);
         }
 
         .title-copy {
             position: relative;
             z-index: 1;
+            width: fit-content;
+            margin: 0 auto;
             text-align: center;
-            color: #2f2a24;
+        }
+
+        .title-deco {
+            position: absolute;
+            z-index: 4;
+            pointer-events: none;
+            font-family: "M PLUS Rounded 1c", sans-serif;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+
+        .title-spark-left {
+            left: -10px;
+            top: -24px;
+            color: #f6c85f;
+            font-size: 24px;
+            transform: rotate(10deg);
+        }
+
+        .title-spark-right {
+            right: -18px;
+            top: -24px;
+            color: #f6c85f;
+            font-size: 24px;
+            transform: rotate(-8deg);
+        }
+
+        .title-spark-right-2 {
+            right: -36px;
+            top: -4px;
+            color: #f6c85f;
+            font-size: 20px;
+            transform: rotate(12deg);
         }
 
         .title-main {
-            font-size: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            font-family: "M PLUS Rounded 1c", sans-serif;
+            font-size: 44px;
             font-weight: 900;
             line-height: 1;
-            letter-spacing: 0.04em;
-            color: #fffaf2;
-            -webkit-text-stroke: 5px #3b2f26;
+            white-space: nowrap;
+            filter: drop-shadow(0 3px 0 #ead1c2);
+        }
+
+        .title-char {
+            display: inline-block;
+            -webkit-text-stroke: 6px #4b352c;
             paint-order: stroke fill;
             text-shadow:
-                0 4px 0 #241c17;
+                0 3px 0 #ffffff,
+                0 7px 0 #4b352c,
+                0 10px 0 #e4c5b5;
+            transform-origin: center bottom;
+        }
+
+        .char-1 {
+            color: #f5a9ad;
+            transform: rotate(-7deg) translateY(4px);
+        }
+
+        .char-2 {
+            color: #fff7e9;
+            transform: rotate(3deg) translateY(-1px);
+        }
+
+        .char-3 {
+            color: #f6c85f;
+            transform: rotate(-5deg) translateY(-6px);
+        }
+
+        .char-4 {
+            color: #fff7e9;
+            transform: rotate(4deg) translateY(1px);
+        }
+
+        .char-5 {
+            color: #f3a5ad;
+            transform: rotate(-4deg) translateY(-3px);
+        }
+
+        .char-6 {
+            color: #f7c85c;
+            transform: rotate(4deg) translateY(-6px);
+        }
+
+        .char-7 {
+            color: #fff7e9;
+            transform: rotate(-3deg) translateY(1px);
+        }
+
+        .char-8 {
+            color: #f3a5ad;
+            transform: rotate(5deg) translateY(-2px);
+        }
+
+        .char-9 {
+            color: #fff7e9;
+            transform: rotate(8deg) translateY(3px);
         }
 
         .title-sub {
-            margin-top: 10px;
-            font-size: 12px;
+            position: relative;
+            width: 100%;
+            margin-top: 42px;
+            text-align: center;
+            font-family: "M PLUS Rounded 1c", sans-serif;
+            font-size: 11px;
             font-weight: 900;
-            letter-spacing: 0.22em;
-            color: #3b2f26;
+            letter-spacing: 0.28em;
+            color: #4b352c;
+        }
+
+        .title-sub::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -30px;
+            width: 20px;
+            height: 13px;
+            border: 3px solid #4b352c;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 35% 40%, #8c5c50 0 2px, transparent 3px),
+                radial-gradient(circle at 65% 55%, #8c5c50 0 2px, transparent 3px),
+                #66443a;
+            transform: translateX(-50%);
+        }
+
+        .ohagi-rays {
+            position: absolute;
+            top: -34px;
+            width: 26px;
+            height: 24px;
+        }
+
+        .ohagi-rays-left {
+            left: calc(50% - 58px);
+        }
+
+        .ohagi-rays-right {
+            right: calc(50% - 58px);
+        }
+
+        .ohagi-rays i {
+            position: absolute;
+            display: block;
+            width: 5px;
+            height: 15px;
+            border-radius: 999px;
+            background: #f58f9f;
+        }
+
+        .ohagi-rays-left i:nth-child(1) {
+            left: 0;
+            top: 8px;
+            transform: rotate(-60deg);
+        }
+
+        .ohagi-rays-left i:nth-child(2) {
+            left: 9px;
+            top: 2px;
+            transform: rotate(-25deg);
+        }
+
+        .ohagi-rays-left i:nth-child(3) {
+            left: 18px;
+            top: 7px;
+            transform: rotate(5deg);
+        }
+
+        .ohagi-rays-right i:nth-child(1) {
+            right: 0;
+            top: 8px;
+            transform: rotate(60deg);
+        }
+
+        .ohagi-rays-right i:nth-child(2) {
+            right: 9px;
+            top: 2px;
+            transform: rotate(25deg);
+        }
+
+        .ohagi-rays-right i:nth-child(3) {
+            right: 18px;
+            top: 7px;
+            transform: rotate(-5deg);
         }
 
 
@@ -122,6 +376,37 @@
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
+        }
+
+        #escapeTab::before {
+            content: "🏃";
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 20px;
+            vertical-align: -2px;
+        }
+
+        #escapeTab::after {
+            content: " ✦";
+            margin-left: 8px;
+            color: #f6c85f;
+            font-size: 20px;
+        }
+
+        #dropTab::before {
+            content: "🍙";
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 20px;
+            vertical-align: -2px;
+        }
+
+        #dropTab::after {
+            content: "  ‹";
+            margin-left: 8px;
+            color: #f5a9ad;
+            font-size: 22px;
+            font-weight: 900;
         }
 
         .tab-button.active {
@@ -174,30 +459,27 @@
 
         @media (max-width: 520px) {
             .title-board {
-                min-height: 118px;
-                padding: 14px 78px 16px;
-                border-radius: 22px;
+                grid-template-columns: 92px minmax(0, 1fr) 92px;
+                min-height: 112px;
+                padding: 8px 0 10px;
             }
 
             .title-character {
+                width: 88px;
+                max-height: 98px;
+            }
+
+            .character-wrap {
                 width: 90px;
-                max-height: 102px;
-            }
-
-            .title-character-left {
-                left: 8px;
-            }
-
-            .title-character-right {
-                right: 8px;
+                height: 100px;
             }
 
             .title-main {
-                font-size: 23px;
+                font-size: 29px;
             }
 
             .title-sub {
-                font-size: 10px;
+                font-size: 9px;
             }
 
 
@@ -217,24 +499,93 @@
 
             <div class="title-board">
 
-                <img class="title-character title-character-left" src="images/giyu-normal.png" alt="">
+                <div class="character-wrap character-wrap-left">
+
+                    <img class="title-character" src="images/giyu-normal.png" alt="">
+
+                    <span class="character-deco giyu-heart" aria-hidden="true">
+                        ♥
+                    </span>
+
+                    <span class="character-deco giyu-heart-right" aria-hidden="true">
+                        ♥
+                    </span>
+
+                    <span class="character-deco giyu-spark" aria-hidden="true">
+                        ✦
+                    </span>
+
+                    <span class="character-deco giyu-motion" aria-hidden="true">
+                        〰
+                    </span>
+
+                </div>
 
                 <div class="title-copy">
+
+                    <span class="title-deco title-spark-left" aria-hidden="true">
+                        ✦
+                    </span>
+
+                    <span class="title-deco title-spark-right" aria-hidden="true">
+                        ✦
+                    </span>
+
+                    <span class="title-deco title-spark-right-2" aria-hidden="true">✦</span>
+
                     <div class="title-main">
-                        おはぎランキング
+                        <span class="title-char char-1">お</span>
+                        <span class="title-char char-2">は</span>
+                        <span class="title-char char-3">ぎ</span>
+                        <span class="title-char char-4">ラ</span>
+                        <span class="title-char char-5">ン</span>
+                        <span class="title-char char-6">キ</span>
+                        <span class="title-char char-7">ン</span>
+                        <span class="title-char char-8">グ</span>
+                        <span class="title-char char-9">！</span>
                     </div>
 
                     <div class="title-sub">
+
+                        <span class="ohagi-rays ohagi-rays-left" aria-hidden="true">
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                        </span>
+
                         OHAGI RANKING
+
+                        <span class="ohagi-rays ohagi-rays-right" aria-hidden="true">
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                        </span>
+
                     </div>
+
                 </div>
 
-                <img class="title-character title-character-right" src="images/sanemi-normal.png" alt="">
+                <div class="character-wrap character-wrap-right">
+
+                    <img class="title-character" src="images/sanemi-normal.png" alt="">
+
+                    <span class="character-deco sanemi-bang-top" aria-hidden="true">
+                        !!
+                    </span>
+
+                    <span class="character-deco sanemi-bang-side" aria-hidden="true">
+                        !!
+                    </span>
+
+                    <span class="character-deco sanemi-motion" aria-hidden="true">
+                        〰
+                    </span>
+
+                </div>
 
             </div>
 
         </div>
-
 
         <div class="tabs">
 
