@@ -51,7 +51,7 @@ export const oauthClient =
             ],
 
             scope:
-                "atproto transition:generic",
+                "atproto",
 
             response_types: [
                 "code"
