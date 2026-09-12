@@ -30,45 +30,80 @@
         }
 
         .title-area {
-            display: grid;
-            grid-template-columns: 110px 1fr 110px;
-            align-items: end;
-            gap: 10px;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
+        }
+
+        .title-board {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            min-height: 130px;
+            padding: 10px 118px 8px;
         }
 
         .title-character {
-            display: block;
-            width: 100%;
-            max-height: 110px;
+            position: absolute;
+            bottom: -2px;
+            width: 128px;
+            max-height: 138px;
             object-fit: contain;
+            z-index: 2;
+            animation: title-bounce 0.7s ease-in-out infinite;
+            transform-origin: center bottom;
         }
 
         .title-character-left {
-            justify-self: end;
+            left: 18px;
         }
 
         .title-character-right {
-            justify-self: start;
+            right: 18px;
+            animation-delay: 0.14s;
         }
 
         .title-copy {
-            align-self: center;
+            position: relative;
+            z-index: 1;
             text-align: center;
+            color: #2f2a24;
         }
 
         .title-main {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 900;
-            line-height: 1.15;
+            line-height: 1;
+            letter-spacing: 0.04em;
+            color: #fffaf2;
+            -webkit-text-stroke: 5px #3b2f26;
+            paint-order: stroke fill;
+            text-shadow:
+                0 4px 0 #241c17;
         }
 
         .title-sub {
-            margin-top: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.18em;
-            opacity: 0.55;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.22em;
+            color: #3b2f26;
+        }
+
+
+        @keyframes title-bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            45% {
+                transform: translateY(-8px);
+            }
+
+            60% {
+                transform: translateY(-3px);
+            }
         }
 
         .tabs {
@@ -138,22 +173,33 @@
         }
 
         @media (max-width: 520px) {
-            .title-area {
-                grid-template-columns: 74px 1fr 74px;
-                gap: 4px;
+            .title-board {
+                min-height: 118px;
+                padding: 14px 78px 16px;
+                border-radius: 22px;
             }
 
             .title-character {
-                max-height: 82px;
+                width: 90px;
+                max-height: 102px;
+            }
+
+            .title-character-left {
+                left: 8px;
+            }
+
+            .title-character-right {
+                right: 8px;
             }
 
             .title-main {
-                font-size: 24px;
+                font-size: 23px;
             }
 
             .title-sub {
-                font-size: 9px;
+                font-size: 10px;
             }
+
 
             .ranking-row {
                 grid-template-columns: 48px 1fr 88px;
@@ -169,21 +215,26 @@
 
         <div class="title-area">
 
-            <img class="title-character title-character-left" src="images/giyu-normal.png" alt="">
+            <div class="title-board">
 
-            <div class="title-copy">
-                <div class="title-main">
-                    おはぎランキング
+                <img class="title-character title-character-left" src="images/giyu-normal.png" alt="">
+
+                <div class="title-copy">
+                    <div class="title-main">
+                        おはぎランキング
+                    </div>
+
+                    <div class="title-sub">
+                        OHAGI RANKING
+                    </div>
                 </div>
 
-                <div class="title-sub">
-                    OHAGI RANKING
-                </div>
+                <img class="title-character title-character-right" src="images/sanemi-normal.png" alt="">
+
             </div>
 
-            <img class="title-character title-character-right" src="images/sanemi-normal.png" alt="">
-
         </div>
+
 
         <div class="tabs">
 
@@ -283,7 +334,9 @@
                             (entry, index) => `
                                 <div class="ranking-row">
                                     <div class="rank">
-                                        ${index + 1}位
+                                        ${index < 3
+                                    ? ["🥇", "🥈", "🥉"][index]
+                                    : (index + 1) + "位"}
                                     </div>
 
                                     <div class="name">
@@ -292,9 +345,9 @@
 
                                     <div class="score">
                                         ${formatScore(
-                                game,
-                                entry.score
-                            )}
+                                        game,
+                                        entry.score
+                                    )}
                                     </div>
                                 </div>
                             `
