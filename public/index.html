@@ -423,11 +423,39 @@
 
         .ranking-row {
             display: grid;
-            grid-template-columns: 64px 1fr 110px;
+            grid-template-columns: 64px 1fr 110px 44px;
             align-items: center;
             min-height: 58px;
             padding: 10px 14px;
             border-bottom: 1px solid #ddd5c8;
+        }
+
+        .share-cell {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .share-score-btn {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            margin: 0;
+
+            border: 0;
+            border-radius: 999px;
+
+            background: #1688f8;
+            color: #fff;
+
+            font-size: 17px;
+            line-height: 1;
+
+            cursor: pointer;
+        }
+
+        .share-score-btn:hover {
+            filter: brightness(1.08);
         }
 
         .ranking-row:last-child {
@@ -489,9 +517,8 @@
                 letter-spacing: 0.22em;
             }
 
-
             .ranking-row {
-                grid-template-columns: 48px 1fr 88px;
+                grid-template-columns: 48px 1fr 72px 40px;
                 padding: 10px;
             }
         }
@@ -662,6 +689,56 @@
             return `${score.toLocaleString()}点`;
         }
 
+
+
+        function shareScore(game, score) {
+
+            let sharePageUrl;
+            let text;
+
+            if (game === "escape") {
+
+                sharePageUrl =
+                    "https" +
+                    `://ohagi-escape.makimaki-feed.net/share?score=${score}`;
+
+                text =
+                    `🌊の🟤攻撃から${score}個かわした！\n` +
+                    `でも最後は食わされたァ！！\n\n` +
+                    `${sharePageUrl}\n\n` +
+                    `#おはぎから逃げろ`;
+
+            } else {
+
+                sharePageUrl =
+                    "https" +
+                    `://ohagi-drop.makimaki-feed.net/share?score=${score}`;
+
+                text = [
+                    `おはぎDROPで ${Number(score).toLocaleString()}点！`,
+                    `腹いっぱいだァ…`,
+                    "",
+                    sharePageUrl,
+                    "",
+                    "#おはぎDROP"
+                ].join("\n");
+            }
+
+            const url =
+                "https" +
+                "://bsky.app/intent/compose?text=" +
+                encodeURIComponent(text);
+
+            window.open(
+                url,
+                "_blank",
+                "noopener,noreferrer"
+            );
+        }
+
+
+
+
         function setActiveTab(game) {
 
             escapeTab.classList.toggle(
@@ -750,6 +827,18 @@
                                         entry.score
                                     )}
                                     </div>
+                                    <div class="share-cell">
+    <button
+        class="share-score-btn"
+        type="button"
+        data-game="${game}"
+        data-score="${entry.score}"
+        aria-label="この記録をBlueskyで共有"
+        title="Blueskyで共有"
+    >
+        🦋
+    </button>
+</div>
                                 </div>
                             `
                         )
@@ -775,6 +864,34 @@
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
         }
+
+        rankingElement.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        ".share-score-btn"
+                    );
+
+                if (!button) {
+                    return;
+                }
+
+                const game =
+                    button.dataset.game;
+
+                const score =
+                    Number(
+                        button.dataset.score
+                    );
+
+                shareScore(
+                    game,
+                    score
+                );
+            }
+        );
 
         escapeTab.addEventListener(
             "click",
