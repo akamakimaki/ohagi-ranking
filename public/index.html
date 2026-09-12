@@ -578,6 +578,73 @@
             font-weight: 900;
             cursor: pointer;
         }
+
+        .game-return {
+            display: flex;
+            justify-content: center;
+            margin-top: 28px;
+        }
+
+        .game-return-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            min-width: 280px;
+            padding: 13px 20px;
+
+            background: #fffaf2;
+            color: #3b342d;
+
+            border: 2px solid #5a5149;
+            border-radius: 14px;
+
+            font: inherit;
+            font-weight: 800;
+            font-size: 15px;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.15s ease,
+                background 0.15s ease;
+        }
+
+        .game-return-button:hover {
+            background: #fff;
+            transform: translateY(-1px);
+        }
+
+        .game-return-button:active {
+            transform: translateY(0);
+        }
+
+        .game-return-icon {
+            font-size: 18px;
+        }
+
+        .game-return-arrow {
+            font-size: 25px;
+            line-height: 1;
+            margin-left: 2px;
+        }
+
+        .game-return-button[hidden] {
+            display: none;
+        }
+
+        @media (max-width: 520px) {
+            .game-return {
+                margin-top: 20px;
+            }
+
+            .game-return-button {
+                width: 100%;
+                min-width: 0;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 
@@ -703,14 +770,20 @@
             </div>
         </section>
 
-        <div id="gameLinks">
-            <button id="backToEscapeBtn" type="button">
-                おはぎから逃げろ！
+        <div id="gameLinks" class="game-return">
+
+            <button id="backToEscapeBtn" class="game-return-button" type="button">
+                <span class="game-return-icon">🎮</span>
+                <span>おはぎから逃げろ！をプレイ</span>
+                <span class="game-return-arrow">›</span>
             </button>
 
-            <button id="backToDropBtn" type="button">
-                おはぎDROP
+            <button id="backToDropBtn" class="game-return-button" type="button">
+                <span class="game-return-icon">🎮</span>
+                <span>おはぎDROPをプレイ</span>
+                <span class="game-return-arrow">›</span>
             </button>
+
         </div>
 
     </main>
@@ -1041,6 +1114,10 @@
         escapeTab.addEventListener(
             "click",
             () => {
+
+                currentGame = "escape";
+                updateGameReturnButton();
+
                 loadRanking("escape");
             }
         );
@@ -1048,6 +1125,10 @@
         dropTab.addEventListener(
             "click",
             () => {
+
+                currentGame = "drop";
+                updateGameReturnButton();
+
                 loadRanking("drop");
             }
         );
@@ -1068,6 +1149,17 @@
             }
         );
 
+
+        function updateGameReturnButton() {
+
+            backToEscapeBtn.hidden =
+                currentGame !== "escape";
+
+            backToDropBtn.hidden =
+                currentGame !== "drop";
+        }
+
+        updateGameReturnButton();
         loadRanking(currentGame);
     </script>
 
