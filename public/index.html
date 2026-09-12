@@ -612,9 +612,15 @@
             </div>
         </section>
 
-        <button id="backToGameBtn" type="button" style="margin-top: 16px;">
-            ゲームに戻る
-        </button>
+        <div id="gameLinks">
+            <button id="backToEscapeBtn" type="button">
+                おはぎから逃げろ！
+            </button>
+
+            <button id="backToDropBtn" type="button">
+                おはぎDROP
+            </button>
+        </div>
 
     </main>
 
@@ -628,8 +634,11 @@
         const dropTab =
             document.getElementById("dropTab");
 
-        const backToGameBtn =
-            document.getElementById("backToGameBtn");
+        const backToEscapeBtn =
+            document.getElementById("backToEscapeBtn");
+
+        const backToDropBtn =
+            document.getElementById("backToDropBtn");
 
         const params =
             new URLSearchParams(
@@ -781,13 +790,19 @@
             }
         );
 
-        backToGameBtn.addEventListener(
+        backToEscapeBtn.addEventListener(
             "click",
             () => {
                 window.location.href =
-                    currentGame === "drop"
-                        ? "https://akamakimaki.github.io/ohagi-drop/"
-                        : "https://akamakimaki.github.io/ohagi-escape/";
+                    "https://akamakimaki.github.io/ohagi-escape/";
+            }
+        );
+
+        backToDropBtn.addEventListener(
+            "click",
+            () => {
+                window.location.href =
+                    "https://akamakimaki.github.io/ohagi-drop/";
             }
         );
 
