@@ -412,10 +412,7 @@ import("./oauth.mjs")
                             req.query.score
                         );
 
-                    if (
-                        allowedGames.has(game) &&
-                        score !== null
-                    ) {
+                    if (allowedGames.has(game)) {
 
                         pendingScoreLogins.set(
                             state,
@@ -527,20 +524,25 @@ import("./oauth.mjs")
                         }
                     );
 
+
+
                     if (pendingScore) {
 
-                        db.prepare(`
-        INSERT INTO private_scores (
-            did,
-            game,
-            score
-        )
-        VALUES (?, ?, ?)
-    `).run(
-                            session.did,
-                            pendingScore.game,
-                            pendingScore.score
-                        );
+                        if (pendingScore.score !== null) {
+
+                            db.prepare(`
+            INSERT INTO private_scores (
+                did,
+                game,
+                score
+            )
+            VALUES (?, ?, ?)
+        `).run(
+                                session.did,
+                                pendingScore.game,
+                                pendingScore.score
+                            );
+                        }
 
                         pendingScoreLogins.delete(
                             state
@@ -552,6 +554,9 @@ import("./oauth.mjs")
                             )}&view=mine`
                         );
                     }
+
+
+
 
                     res.redirect(
                         "/?game=drop&view=mine"

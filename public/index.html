@@ -522,6 +522,62 @@
                 padding: 10px;
             }
         }
+
+        .my-score-nav {
+            display: flex;
+            justify-content: flex-end;
+            margin: 0 0 12px;
+        }
+
+        #myScoreBtn {
+            border: 0;
+            background: transparent;
+            color: #555;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            padding: 6px 4px;
+        }
+
+        #myScoreBtn:hover {
+            text-decoration: underline;
+        }
+
+        .login-box {
+            padding: 32px 20px;
+            text-align: center;
+        }
+
+        .login-box p {
+            margin: 0 0 16px;
+            font-weight: 800;
+        }
+
+        .login-form {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .login-form input {
+            width: min(100%, 320px);
+            padding: 10px 12px;
+            border: 2px solid #2f2a24;
+            border-radius: 10px;
+            font: inherit;
+        }
+
+        .login-form button {
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 10px;
+            background: #1185fe;
+            color: #fff;
+            font: inherit;
+            font-weight: 900;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -633,6 +689,14 @@
 
         </div>
 
+
+        <div class="my-score-nav">
+            <button id="myScoreBtn" type="button">
+                👤 自分の記録
+            </button>
+        </div>
+
+
         <section id="ranking" class="ranking-card">
             <div class="loading">
                 読み込み中...
@@ -666,6 +730,9 @@
 
         const backToDropBtn =
             document.getElementById("backToDropBtn");
+
+        const myScoreBtn =
+            document.getElementById("myScoreBtn");
 
         const params =
             new URLSearchParams(
@@ -772,6 +839,72 @@
                             credentials: "include"
                         }
                     );
+
+                if (
+                    mineView &&
+                    response.status === 401
+                ) {
+
+                    rankingElement.innerHTML = `
+        <div class="login-box">
+
+            <p>
+                🦋 自分の記録を見るには<br>
+                Blueskyでログインしてください
+            </p>
+
+            <form
+                id="rankingLoginForm"
+                class="login-form"
+            >
+                <input
+                    id="rankingHandle"
+                    type="text"
+                    placeholder="example.bsky.social"
+                    autocomplete="username"
+                    required
+                >
+
+                <button type="submit">
+                    Blueskyでログイン
+                </button>
+            </form>
+
+        </div>
+    `;
+
+                    const loginForm =
+                        document.getElementById(
+                            "rankingLoginForm"
+                        );
+
+                    loginForm.addEventListener(
+                        "submit",
+                        event => {
+
+                            event.preventDefault();
+
+                            const handle =
+                                document
+                                    .getElementById(
+                                        "rankingHandle"
+                                    )
+                                    .value
+                                    .trim()
+                                    .replace(/^[@＠]+/, "");
+
+                            if (!handle) {
+                                return;
+                            }
+
+                            window.location.href =
+                                `/login?handle=${encodeURIComponent(handle)}` +
+                                `&game=${encodeURIComponent(game)}`;
+                        }
+                    );
+
+                    return;
+                }
 
                 if (!response.ok) {
                     throw new Error(
@@ -892,6 +1025,18 @@
                 );
             }
         );
+
+
+        myScoreBtn.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    `/?game=${encodeURIComponent(currentGame)}&view=mine`;
+            }
+        );
+
+
 
         escapeTab.addEventListener(
             "click",
