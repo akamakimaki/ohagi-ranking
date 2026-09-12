@@ -438,22 +438,21 @@ import("./oauth.mjs")
                             req.url.split("?")[1] || ""
                         );
 
-                    const oauthState =
-                        params.get("state");
-
-                    const pendingScore =
-                        oauthState
-                            ? pendingScoreLogins.get(
-                                oauthState
-                            )
-                            : null;
 
                     const {
-                        session
+                        session,
+                        state
                     } =
                         await oauthClient.callback(
                             params
                         );
+
+                    const pendingScore =
+                        state
+                            ? pendingScoreLogins.get(
+                                state
+                            )
+                            : null;
 
                     const sessionToken =
                         crypto
@@ -511,7 +510,7 @@ import("./oauth.mjs")
                         );
 
                         pendingScoreLogins.delete(
-                            oauthState
+                            state
                         );
 
                         return res.redirect(
