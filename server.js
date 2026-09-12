@@ -57,6 +57,9 @@ const allowedGames = new Set([
     "drop"
 ]);
 
+const pendingScoreLogins =
+    new Map();
+
 function normalizeName(value) {
     const name =
         String(value || "")
@@ -383,6 +386,30 @@ import("./oauth.mjs")
                     const state =
                         crypto.randomUUID();
 
+                    const game =
+                        String(
+                            req.query.game || ""
+                        );
+
+                    const score =
+                        normalizeScore(
+                            req.query.score
+                        );
+
+                    if (
+                        allowedGames.has(game) &&
+                        score !== null
+                    ) {
+
+                        pendingScoreLogins.set(
+                            state,
+                            {
+                                game,
+                                score
+                            }
+                        );
+                    }
+
                     const url =
                         await oauthClient.authorize(
                             handle,
@@ -410,6 +437,16 @@ import("./oauth.mjs")
                         new URLSearchParams(
                             req.url.split("?")[1] || ""
                         );
+
+                    const oauthState =
+                        params.get("state");
+
+                    const pendingScore =
+                        oauthState
+                            ? pendingScoreLogins.get(
+                                oauthState
+                            )
+                            : null;
 
                     const {
                         session
@@ -458,10 +495,35 @@ import("./oauth.mjs")
                         }
                     );
 
-                    res.json({
-                        ok: true,
-                        did: session.did
-                    });
+                    if (pendingScore) {
+
+                        db.prepare(`
+        INSERT INTO private_scores (
+            did,
+            game,
+            score
+        )
+        VALUES (?, ?, ?)
+    `).run(
+                            session.did,
+                            pendingScore.game,
+                            pendingScore.score
+                        );
+
+                        pendingScoreLogins.delete(
+                            oauthState
+                        );
+
+                        return res.redirect(
+                            `/?game=${encodeURIComponent(
+                                pendingScore.game
+                            )}&view=mine`
+                        );
+                    }
+
+                    res.redirect(
+                        "/?game=drop&view=mine"
+                    );
 
                 } catch (error) {
 
