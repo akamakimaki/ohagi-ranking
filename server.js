@@ -133,8 +133,110 @@ app.get("/api/ranking", (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(
-        `ohagi-ranking listening on port ${PORT}`
-    );
-});
+import("./oauth.mjs")
+    .then(({ oauthClient }) => {
+
+        app.get(
+            "/client-metadata.json",
+            (req, res) => {
+
+                res.json(
+                    oauthClient.clientMetadata
+                );
+            }
+        );
+
+        app.get(
+            "/jwks.json",
+            (req, res) => {
+
+                res.json(
+                    oauthClient.jwks
+                );
+            }
+        );
+
+        app.get(
+            "/login",
+            async (req, res, next) => {
+
+                try {
+
+                    const handle =
+                        String(
+                            req.query.handle || ""
+                        ).trim();
+
+                    if (!handle) {
+
+                        return res.status(400).json({
+                            error: "handle_required"
+                        });
+                    }
+
+                    const state =
+                        crypto.randomUUID();
+
+                    const url =
+                        await oauthClient.authorize(
+                            handle,
+                            {
+                                state
+                            }
+                        );
+
+                    res.redirect(url);
+
+                } catch (error) {
+
+                    next(error);
+                }
+            }
+        );
+
+        app.get(
+            "/atproto-oauth-callback",
+            async (req, res, next) => {
+
+                try {
+
+                    const params =
+                        new URLSearchParams(
+                            req.url.split("?")[1] || ""
+                        );
+
+                    const {
+                        session
+                    } =
+                        await oauthClient.callback(
+                            params
+                        );
+
+                    res.json({
+                        ok: true,
+                        did: session.did
+                    });
+
+                } catch (error) {
+
+                    next(error);
+                }
+            }
+        );
+
+        app.listen(PORT, () => {
+
+            console.log(
+                `ohagi-ranking listening on port ${PORT}`
+            );
+        });
+    })
+    .catch(error => {
+
+        console.error(
+            "OAuth initialization failed",
+            error
+        );
+
+        process.exit(1);
+    });
