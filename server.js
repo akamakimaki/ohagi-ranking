@@ -371,16 +371,32 @@ import("./oauth.mjs")
 
                 try {
 
-                    const handle =
+                    let handle =
                         String(
                             req.query.handle || ""
                         ).trim();
 
+                    // @ / 全角＠を先頭に付けた入力にも対応
+                    handle = handle
+                        .replace(/^[@＠]+/, "")
+                        .trim();
+
                     if (!handle) {
 
-                        return res.status(400).json({
-                            error: "handle_required"
-                        });
+                        return res.status(400).send(
+                            "Blueskyのハンドルを入力してください。例：example.bsky.social"
+                        );
+                    }
+
+                    // 表示名など、ハンドルではない入力をOAuthへ送らない
+                    if (
+                        !handle.includes(".") ||
+                        /\s/.test(handle)
+                    ) {
+
+                        return res.status(400).send(
+                            "Blueskyの表示名ではなく、ハンドルを入力してください。例：example.bsky.social"
+                        );
                     }
 
                     const state =
@@ -410,13 +426,30 @@ import("./oauth.mjs")
                         );
                     }
 
-                    const url =
-                        await oauthClient.authorize(
+                    let url;
+
+                    try {
+
+                        url =
+                            await oauthClient.authorize(
+                                handle,
+                                {
+                                    state
+                                }
+                            );
+
+                    } catch (error) {
+
+                        console.error(
+                            "Bluesky identity resolution failed:",
                             handle,
-                            {
-                                state
-                            }
+                            error
                         );
+
+                        return res.status(400).send(
+                            "Blueskyのハンドルを確認してください。例：example.bsky.social"
+                        );
+                    }
 
                     res.redirect(url);
 
