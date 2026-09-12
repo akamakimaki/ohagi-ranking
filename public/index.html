@@ -3,10 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>おはぎランキング</title>
 
@@ -32,10 +29,46 @@
             margin: 0 auto;
         }
 
-        h1 {
-            margin: 0 0 20px;
+        .title-area {
+            display: grid;
+            grid-template-columns: 110px 1fr 110px;
+            align-items: end;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .title-character {
+            display: block;
+            width: 100%;
+            max-height: 110px;
+            object-fit: contain;
+        }
+
+        .title-character-left {
+            justify-self: end;
+        }
+
+        .title-character-right {
+            justify-self: start;
+        }
+
+        .title-copy {
+            align-self: center;
             text-align: center;
+        }
+
+        .title-main {
             font-size: 32px;
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .title-sub {
+            margin-top: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            opacity: 0.55;
         }
 
         .tabs {
@@ -105,8 +138,21 @@
         }
 
         @media (max-width: 520px) {
-            h1 {
-                font-size: 26px;
+            .title-area {
+                grid-template-columns: 74px 1fr 74px;
+                gap: 4px;
+            }
+
+            .title-character {
+                max-height: 82px;
+            }
+
+            .title-main {
+                font-size: 24px;
+            }
+
+            .title-sub {
+                font-size: 9px;
             }
 
             .ranking-row {
@@ -121,32 +167,37 @@
 
     <main class="ranking-page">
 
-        <h1>🍵 おはぎランキング</h1>
+        <div class="title-area">
+
+            <img class="title-character title-character-left" src="images/giyu-normal.png" alt="">
+
+            <div class="title-copy">
+                <div class="title-main">
+                    おはぎランキング
+                </div>
+
+                <div class="title-sub">
+                    OHAGI RANKING
+                </div>
+            </div>
+
+            <img class="title-character title-character-right" src="images/sanemi-normal.png" alt="">
+
+        </div>
 
         <div class="tabs">
 
-            <button
-                id="escapeTab"
-                class="tab-button"
-                type="button"
-            >
+            <button id="escapeTab" class="tab-button" type="button">
                 おはぎから逃げろ！
             </button>
 
-            <button
-                id="dropTab"
-                class="tab-button"
-                type="button"
-            >
+            <button id="dropTab" class="tab-button" type="button">
                 おはぎDROP
             </button>
 
         </div>
 
-        <section
-            id="ranking"
-            class="ranking-card"
-        >
+        <section id="ranking" class="ranking-card">
             <div class="loading">
                 読み込み中...
             </div>
@@ -241,9 +292,9 @@
 
                                     <div class="score">
                                         ${formatScore(
-                                            game,
-                                            entry.score
-                                        )}
+                                game,
+                                entry.score
+                            )}
                                     </div>
                                 </div>
                             `
