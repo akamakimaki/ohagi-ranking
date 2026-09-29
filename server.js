@@ -10,6 +10,7 @@ const PORT = 3010;
 app.use(cors({
     origin: [
         "https://akamakimaki.github.io",
+        "https://tools.makimaki-feed.net",
         "http://localhost:5500",
         "http://127.0.0.1:5500"
     ],
@@ -44,6 +45,27 @@ db.exec(`
     )
 `);
 
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS play_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id TEXT NOT NULL UNIQUE,
+        game TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+db.exec(`
+    CREATE INDEX IF NOT EXISTS
+        idx_play_events_game_created_at
+    ON play_events (
+        game,
+        created_at
+    )
+`);
+
+
 db.exec(`
     CREATE TABLE IF NOT EXISTS login_sessions (
         token_hash TEXT PRIMARY KEY,
@@ -54,11 +76,51 @@ db.exec(`
 
 const allowedGames = new Set([
     "escape",
-    "drop"
+    "drop",
+    "kiss"
 ]);
 
 const pendingScoreLogins =
     new Map();
+
+const playEventRates = new Map();
+const PLAY_RATE_WINDOW_MS = 10 * 60 * 1000;
+const PLAY_RATE_LIMIT = 60;
+
+function allowPlayEvent(req) {
+
+    const now = Date.now();
+
+    const clientKey =
+        String(
+            req.headers["cf-connecting-ip"] ||
+            req.ip ||
+            "unknown"
+        ).slice(0, 100);
+
+    const current =
+        playEventRates.get(clientKey);
+
+    if (
+        !current ||
+        now - current.startedAt >=
+        PLAY_RATE_WINDOW_MS
+    ) {
+        playEventRates.set(clientKey, {
+            startedAt: now,
+            count: 1
+        });
+
+        return true;
+    }
+
+    if (current.count >= PLAY_RATE_LIMIT) {
+        return false;
+    }
+
+    current.count += 1;
+    return true;
+}
 
 function normalizeName(value) {
     const name =
@@ -212,8 +274,18 @@ app.post("/api/scores", (req, res) => {
     });
 });
 
-app.get("/api/ranking", (req, res) => {
-    const game = req.query.game;
+app.post("/api/play-events", (req, res) => {
+
+    const game =
+        String(req.body.game || "");
+
+    const score =
+        normalizeScore(req.body.score);
+
+    const eventId =
+        String(req.body.event_id || "")
+            .trim()
+            .slice(0, 100);
 
     if (!allowedGames.has(game)) {
         return res.status(400).json({
@@ -221,8 +293,63 @@ app.get("/api/ranking", (req, res) => {
         });
     }
 
-    const rows =
+    if (
+        score === null ||
+        score > 100000000
+    ) {
+        return res.status(400).json({
+            error: "invalid_score"
+        });
+    }
+
+    if (
+        eventId.length < 16 ||
+        !/^[a-zA-Z0-9_-]+$/.test(eventId)
+    ) {
+        return res.status(400).json({
+            error: "invalid_event_id"
+        });
+    }
+
+    if (!allowPlayEvent(req)) {
+        return res.status(429).json({
+            error: "too_many_requests"
+        });
+    }
+
+    const result =
         db.prepare(`
+            INSERT OR IGNORE INTO play_events (
+                event_id,
+                game,
+                score
+            )
+            VALUES (?, ?, ?)
+        `).run(
+            eventId,
+            game,
+            score
+        );
+
+    res.status(
+        result.changes === 1 ? 201 : 200
+    ).json({
+        ok: true,
+        duplicate: result.changes === 0
+    });
+});
+
+app.get("/api/ranking", (req, res) => {
+const game = req.query.game;
+
+if (!allowedGames.has(game)) {
+    return res.status(400).json({
+        error: "invalid_game"
+    });
+}
+
+const rows =
+    db.prepare(`
             SELECT
                 id,
                 game,
@@ -237,10 +364,10 @@ app.get("/api/ranking", (req, res) => {
             LIMIT 20
         `).all(game);
 
-    res.json({
-        game,
-        ranking: rows
-    });
+res.json({
+    game,
+    ranking: rows
+});
 });
 
 
@@ -327,8 +454,9 @@ app.get(
                 WHERE did = ?
                   AND game = ?
                 ORDER BY
+                    score DESC,
                     created_at DESC
-                LIMIT 100
+                LIMIT 20
             `).all(
                 req.loginDid,
                 game

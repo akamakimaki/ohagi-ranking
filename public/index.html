@@ -362,7 +362,7 @@
 
         .tabs {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -384,13 +384,7 @@
             margin-right: 10px;
             font-size: 20px;
             vertical-align: -2px;
-        }
 
-        #escapeTab::after {
-            content: " ✦";
-            margin-left: 8px;
-            color: #f6c85f;
-            font-size: 20px;
         }
 
         #dropTab::before {
@@ -407,6 +401,15 @@
             color: #f5a9ad;
             font-size: 22px;
             font-weight: 900;
+        }
+
+
+        #kissTab::before {
+            content: "💋";
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 20px;
+            vertical-align: -2px;
         }
 
         .tab-button.active {
@@ -754,12 +757,16 @@
                 おはぎDROP
             </button>
 
+            <button id="kissTab" class="tab-button" type="button">
+                おはぎKISS
+            </button>
+
         </div>
 
 
         <div class="my-score-nav">
             <button id="myScoreBtn" type="button">
-                👤 自分の記録
+                👤 自分の記録 ベスト20
             </button>
         </div>
 
@@ -784,6 +791,12 @@
                 <span class="game-return-arrow">›</span>
             </button>
 
+            <button id="backToKissBtn" class="game-return-button" type="button">
+                <span class="game-return-icon">🎮</span>
+                <span>おはぎKISSをプレイ</span>
+                <span class="game-return-arrow">›</span>
+            </button>
+
         </div>
 
     </main>
@@ -798,11 +811,17 @@
         const dropTab =
             document.getElementById("dropTab");
 
+        const kissTab =
+            document.getElementById("kissTab");
+
         const backToEscapeBtn =
             document.getElementById("backToEscapeBtn");
 
         const backToDropBtn =
             document.getElementById("backToDropBtn");
+
+        const backToKissBtn =
+            document.getElementById("backToKissBtn");
 
         const myScoreBtn =
             document.getElementById("myScoreBtn");
@@ -815,9 +834,16 @@
         const mineView =
             params.get("view") === "mine";
 
+        let pendingScore =
+            params.has("score") &&
+                Number.isInteger(Number(params.get("score"))) &&
+                Number(params.get("score")) >= 0
+                ? Number(params.get("score"))
+                : null;
+
         let currentGame =
-            params.get("game") === "drop"
-                ? "drop"
+            ["escape", "drop", "kiss"].includes(params.get("game"))
+                ? params.get("game")
                 : "escape";
 
         function formatScore(game, score) {
@@ -825,22 +851,21 @@
             if (game === "escape") {
                 return `${score}個`;
             }
-
+            if (game === "kiss") {
+                return `${score}回`;
+            }
             return `${score.toLocaleString()}点`;
         }
 
 
 
         function shareScore(game, score) {
-
             let sharePageUrl;
             let text;
 
             if (game === "escape") {
-
                 sharePageUrl =
-                    "https" +
-                    `://ohagi-escape.makimaki-feed.net/share?score=${score}`;
+                    "https://ohagi-escape.makimaki-feed.net/share?score=" + score;
 
                 text =
                     `🌊の🟤攻撃から${score}個かわした！\n` +
@@ -848,11 +873,21 @@
                     `${sharePageUrl}\n\n` +
                     `#おはぎから逃げろ`;
 
-            } else {
-
+            } else if (game === "kiss") {
                 sharePageUrl =
-                    "https" +
-                    `://ohagi-drop.makimaki-feed.net/share?score=${score}`;
+                    "https://akamakimaki.github.io/ohagi-kiss/";
+
+                text = [
+                    `おはぎKISS💋の結果　${Number(score).toLocaleString()}回キスされたァ…！！`,
+                    "",
+                    sharePageUrl,
+                    "",
+                    "#おはぎKISS"
+                ].join("\n");
+
+            } else {
+                sharePageUrl =
+                    "https://ohagi-drop.makimaki-feed.net/share?score=" + score;
 
                 text = [
                     `おはぎDROPで ${Number(score).toLocaleString()}点！`,
@@ -865,15 +900,10 @@
             }
 
             const url =
-                "https" +
-                "://bsky.app/intent/compose?text=" +
+                "https://bsky.app/intent/compose?text=" +
                 encodeURIComponent(text);
 
-            window.open(
-                url,
-                "_blank",
-                "noopener,noreferrer"
-            );
+            window.open(url, "_blank", "noopener,noreferrer");
         }
 
 
@@ -889,6 +919,11 @@
             dropTab.classList.toggle(
                 "active",
                 game === "drop"
+            );
+
+            kissTab.classList.toggle(
+                "active",
+                game === "kiss"
             );
         }
 
@@ -970,9 +1005,21 @@
                                 return;
                             }
 
+                            const loginParams =
+                                new URLSearchParams({
+                                    handle,
+                                    game
+                                });
+
+                            if (pendingScore !== null) {
+                                loginParams.set(
+                                    "score",
+                                    String(pendingScore)
+                                );
+                            }
+
                             window.location.href =
-                                `/login?handle=${encodeURIComponent(handle)}` +
-                                `&game=${encodeURIComponent(game)}`;
+                                `/login?${loginParams}`;
                         }
                     );
 
@@ -987,6 +1034,48 @@
 
                 const data =
                     await response.json();
+
+                if (
+                    mineView &&
+                    pendingScore !== null
+                ) {
+                    const saveResponse =
+                        await fetch(
+                            "/api/my-scores",
+                            {
+                                method: "POST",
+                                credentials: "include",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    game,
+                                    score: pendingScore
+                                })
+                            }
+                        );
+
+                    if (!saveResponse.ok) {
+                        throw new Error(
+                            "score save failed"
+                        );
+                    }
+
+                    pendingScore = null;
+
+                    const cleanUrl =
+                        new URL(window.location.href);
+
+                    cleanUrl.searchParams.delete("score");
+
+                    window.history.replaceState(
+                        null,
+                        "",
+                        cleanUrl
+                    );
+
+                    return loadRanking(game);
+                }
 
                 const ranking =
                     mineView
@@ -1133,6 +1222,12 @@
             }
         );
 
+        kissTab.addEventListener("click", () => {
+            currentGame = "kiss";
+            updateGameReturnButton();
+            loadRanking("kiss");
+        });
+
         backToEscapeBtn.addEventListener(
             "click",
             () => {
@@ -1150,6 +1245,11 @@
         );
 
 
+        backToKissBtn.addEventListener("click", () => {
+            window.location.href =
+                "https://akamakimaki.github.io/ohagi-kiss/";
+        });
+
         function updateGameReturnButton() {
 
             backToEscapeBtn.hidden =
@@ -1157,6 +1257,8 @@
 
             backToDropBtn.hidden =
                 currentGame !== "drop";
+
+            backToKissBtn.hidden = currentGame !== "kiss";
         }
 
         updateGameReturnButton();
