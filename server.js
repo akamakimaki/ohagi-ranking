@@ -339,17 +339,168 @@ app.post("/api/play-events", (req, res) => {
     });
 });
 
-app.get("/api/ranking", (req, res) => {
-const game = req.query.game;
 
-if (!allowedGames.has(game)) {
-    return res.status(400).json({
-        error: "invalid_game"
+app.get("/api/play-stats", (req, res) => {
+
+    const createEmptyStats = () => ({
+        plays: 0,
+        totalScore: 0,
+        averageScore: 0,
+        highScore: 0,
+        todayPlays: 0,
+        todayScore: 0
     });
-}
 
-const rows =
-    db.prepare(`
+    const stats = {
+        escape: createEmptyStats(),
+        drop: createEmptyStats(),
+        kiss: createEmptyStats()
+    };
+
+    /*
+     * 各ゲームについて、
+     * ・匿名計測開始前：private_scores
+     * ・匿名計測開始後：play_events
+     * を使う。
+     *
+     * 匿名計測開始後のprivate_scoresは除外し、
+     * 同じプレイの二重計上を防ぐ。
+     */
+    const combinedRecords = `
+        WITH first_event AS (
+            SELECT
+                game,
+                MIN(created_at) AS started_at
+            FROM play_events
+            GROUP BY game
+        ),
+        combined AS (
+            SELECT
+                private_scores.game AS game,
+                private_scores.score AS score,
+                private_scores.created_at AS created_at
+            FROM private_scores
+            LEFT JOIN first_event
+                ON first_event.game =
+                    private_scores.game
+            WHERE
+                first_event.started_at IS NULL
+                OR private_scores.created_at <
+                    first_event.started_at
+
+            UNION ALL
+
+            SELECT
+                game,
+                score,
+                created_at
+            FROM play_events
+        )
+    `;
+
+    const totalRows =
+        db.prepare(`
+            ${combinedRecords}
+
+            SELECT
+                game,
+                COUNT(*) AS plays,
+                COALESCE(
+                    SUM(score),
+                    0
+                ) AS totalScore,
+                COALESCE(
+                    ROUND(AVG(score), 1),
+                    0
+                ) AS averageScore,
+                COALESCE(
+                    MAX(score),
+                    0
+                ) AS highScore
+            FROM combined
+            GROUP BY game
+        `).all();
+
+    const todayRows =
+        db.prepare(`
+            ${combinedRecords}
+
+            SELECT
+                game,
+                COUNT(*) AS todayPlays,
+                COALESCE(
+                    SUM(score),
+                    0
+                ) AS todayScore
+            FROM combined
+            WHERE date(
+                created_at,
+                '+9 hours'
+            ) = date(
+                'now',
+                '+9 hours'
+            )
+            GROUP BY game
+        `).all();
+
+    for (const row of totalRows) {
+
+        if (!stats[row.game]) {
+            continue;
+        }
+
+        stats[row.game].plays =
+            row.plays;
+
+        stats[row.game].totalScore =
+            row.totalScore;
+
+        stats[row.game].averageScore =
+            row.averageScore;
+
+        stats[row.game].highScore =
+            row.highScore;
+    }
+
+    for (const row of todayRows) {
+
+        if (!stats[row.game]) {
+            continue;
+        }
+
+        stats[row.game].todayPlays =
+            row.todayPlays;
+
+        stats[row.game].todayScore =
+            row.todayScore;
+    }
+
+    res.set(
+        "Cache-Control",
+        "public, max-age=30"
+    );
+
+    res.json({
+        anonymousTrackingSince:
+            "2026-09-29",
+        updatedAt:
+            new Date().toISOString(),
+        games: stats
+    });
+});
+
+
+app.get("/api/ranking", (req, res) => {
+    const game = req.query.game;
+
+    if (!allowedGames.has(game)) {
+        return res.status(400).json({
+            error: "invalid_game"
+        });
+    }
+
+    const rows =
+        db.prepare(`
             SELECT
                 id,
                 game,
@@ -364,10 +515,10 @@ const rows =
             LIMIT 20
         `).all(game);
 
-res.json({
-    game,
-    ranking: rows
-});
+    res.json({
+        game,
+        ranking: rows
+    });
 });
 
 

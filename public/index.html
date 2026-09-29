@@ -388,11 +388,15 @@
         }
 
         #dropTab::before {
-            content: "🍙";
+            content: "🟤";
             display: inline-block;
             margin-right: 10px;
-            font-size: 20px;
+            background: none;
+            font-size: 18px;
+            line-height: 1;
             vertical-align: -2px;
+            filter:
+                drop-shadow(0 0 1px #fff8e8) drop-shadow(0 0 1px #fff8e8);
         }
 
         #dropTab::after {
@@ -528,21 +532,30 @@
 
         .my-score-nav {
             display: flex;
-            justify-content: flex-end;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
             margin: 0 0 12px;
         }
 
-        #myScoreBtn {
-            border: 0;
+        #myScoreBtn,
+        .stats-link {
             background: transparent;
             color: #555;
             font: inherit;
             font-weight: 800;
             cursor: pointer;
             padding: 6px 4px;
+            text-decoration: none;
+            white-space: nowrap;
         }
 
-        #myScoreBtn:hover {
+        #myScoreBtn:hover,
+        .stats-link:hover {
+            .stats-link {
+                color: #367f7a;
+            }
+
             text-decoration: underline;
         }
 
@@ -647,6 +660,16 @@
                 min-width: 0;
                 font-size: 14px;
             }
+        }
+
+        /* 「自分の記録」のボタン枠を消す */
+        .my-score-nav #myScoreBtn {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 0;
+            outline: 0;
+            box-shadow: none;
+            background: transparent;
         }
     </style>
 </head>
@@ -765,6 +788,10 @@
 
 
         <div class="my-score-nav">
+            <a class="stats-link" href="./stats.html">
+                📊 みんなのおはぎ記録
+            </a>
+
             <button id="myScoreBtn" type="button">
                 👤 自分の記録 ベスト20
             </button>

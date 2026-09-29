@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#e4f5ef">
+    <title>みんなのおはぎ記録</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px 16px 40px;
+            background:
+                radial-gradient(circle at top left,
+                    #e1f4fa 0,
+                    transparent 42%),
+                radial-gradient(circle at top right,
+                    #e1f3df 0,
+                    transparent 42%),
+                #eef8f3;
+            color: #2f2a24;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        .stats-page {
+            width: min(100%, 760px);
+            margin: 0 auto;
+        }
+
+        .title-board {
+            display: grid;
+            grid-template-columns:
+                135px minmax(0, 1fr) 135px;
+            align-items: end;
+            min-height: 150px;
+            margin-bottom: 20px;
+        }
+
+        .character {
+            display: block;
+            width: 135px;
+            max-height: 145px;
+            object-fit: contain;
+        }
+
+        .character:last-child {
+            justify-self: end;
+        }
+
+        .title-copy {
+            align-self: center;
+            min-width: 0;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(28px, 6vw, 46px);
+            line-height: 1.15;
+            letter-spacing: 0.03em;
+        }
+
+        h1 .blue {
+            color: #4d91a4;
+        }
+
+        h1 .green {
+            color: #6b9a67;
+        }
+
+        .subtitle {
+            margin: 10px 0 0;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.25em;
+        }
+
+        .summary {
+            margin-bottom: 20px;
+            padding: 22px;
+            border: 2px solid #2f2a24;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 5px 0 #2f2a24;
+            text-align: center;
+        }
+
+        .summary h2 {
+            margin: 0 0 18px;
+            font-size: 22px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .summary-item {
+            padding: 15px 10px;
+            border-radius: 14px;
+            background: #e8f6f1;
+        }
+
+        .summary-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .summary-value {
+            color: #367f79;
+            font-size: 30px;
+            font-weight: 900;
+        }
+
+        .summary-unit {
+            margin-left: 3px;
+            font-weight: 800;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .game-card {
+            overflow: hidden;
+            border: 2px solid #2f2a24;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 5px 0 #2f2a24;
+        }
+
+        .game-title {
+            margin: 0;
+            padding: 14px 10px;
+            border-bottom: 2px solid #2f2a24;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .escape .game-title {
+            background: #dff1df;
+        }
+
+        .drop .game-title {
+            background: #e5f4ed;
+        }
+
+        .kiss .game-title {
+            background: #f9e4ed;
+        }
+
+        .game-body {
+            padding: 20px 14px 16px;
+            text-align: center;
+        }
+
+        .main-label {
+            margin: 0 0 7px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .main-value {
+            margin: 0;
+            color: #367f79;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .kiss .main-value {
+            color: #c54c7d;
+        }
+
+        .main-unit {
+            margin-left: 3px;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .detail-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #c8c2b8;
+            font-size: 13px;
+        }
+
+        .detail strong {
+            text-align: right;
+        }
+
+        .notice {
+            margin: 24px 0 0;
+            padding: 15px;
+            border: 2px solid #7ba9a2;
+            border-radius: 14px;
+            background: #f8fffc;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: grid;
+            min-height: 54px;
+            padding: 12px;
+            place-items: center;
+            border: 2px solid #2f2a24;
+            border-radius: 14px;
+            color: #2f2a24;
+            font-weight: 800;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #reload {
+            background: #bfe4de;
+        }
+
+        .ranking-link {
+            background: #fff;
+        }
+
+        .status {
+            min-height: 24px;
+            margin: 18px 0 0;
+            color: #54736e;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @media (max-width: 620px) {
+            body {
+                padding: 14px 12px 32px;
+            }
+
+            .title-board {
+                grid-template-columns:
+                    78px minmax(0, 1fr) 78px;
+                min-height: 112px;
+            }
+
+            .character {
+                width: 82px;
+                max-height: 100px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+
+            .subtitle {
+                font-size: 9px;
+                letter-spacing: 0.16em;
+            }
+
+            .summary {
+                padding: 17px 14px;
+            }
+
+            .summary-value {
+                font-size: 27px;
+            }
+
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card {
+                display: grid;
+                grid-template-columns: 128px 1fr;
+            }
+
+            .game-title {
+                display: grid;
+                min-height: 100%;
+                place-items: center;
+                border-right: 2px solid #2f2a24;
+                border-bottom: 0;
+            }
+
+            .game-body {
+                padding: 16px 14px 13px;
+            }
+
+            .main-value {
+                font-size: 31px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .title-board {
+                grid-template-columns:
+                    65px minmax(0, 1fr) 65px;
+            }
+
+            .character {
+                width: 70px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+
+            .summary-grid,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card {
+                grid-template-columns: 108px 1fr;
+            }
+        }
+
+        /* ランキング画面と同じ丸文字へ統一 */
+        body {
+            font-family:
+                "M PLUS Rounded 1c",
+                -apple-system,
+                BlinkMacSystemFont,
+                sans-serif;
+            font-weight: 800;
+        }
+
+        /* タイトル */
+        .title-board {
+            position: relative;
+            grid-template-columns:
+                135px minmax(0, 1fr) 135px;
+            align-items: center;
+            min-height: 165px;
+            margin-bottom: 12px;
+            padding-top: 10px;
+        }
+
+        .character-wrap {
+            position: relative;
+            display: flex;
+            width: 135px;
+            height: 145px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .character-wrap-left {
+            justify-self: start;
+        }
+
+        .character-wrap-right {
+            justify-self: end;
+        }
+
+        .title-character {
+            display: block;
+            width: 128px;
+            max-height: 138px;
+            object-fit: contain;
+            transform-origin: center bottom;
+            animation:
+                title-bounce 0.7s ease-in-out infinite;
+        }
+
+        .character-wrap-right .title-character {
+            animation-delay: 0.14s;
+        }
+
+        .title-copy {
+            position: relative;
+            align-self: center;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .title-main {
+            display: block;
+            margin: 0;
+            font-family:
+                "M PLUS Rounded 1c",
+                sans-serif;
+            font-size: clamp(31px, 5vw, 43px);
+            font-weight: 900;
+            line-height: 1.08;
+            filter:
+                drop-shadow(0 4px 0 #b8d9d2);
+        }
+
+        .title-line {
+            display: flex;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .title-line+.title-line {
+            margin-top: 7px;
+        }
+
+        .title-char {
+            display: inline-block;
+            -webkit-text-stroke: 5px #44382f;
+            paint-order: stroke fill;
+            text-shadow:
+                1px 1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px -1px 0 #fff;
+            transform: rotate(-2deg);
+        }
+
+        .title-char:nth-child(even) {
+            transform:
+                translateY(-2px) rotate(2deg);
+        }
+
+        .title-char.aqua {
+            color: #91d7df;
+        }
+
+        .title-char.mint {
+            color: #a9d99f;
+        }
+
+        .title-char.cream {
+            color: #f1d990;
+        }
+
+        .title-char.pink {
+            color: #f3abbc;
+        }
+
+        .subtitle {
+            margin: 14px 0 0;
+            color: #44382f;
+            font-family:
+                "M PLUS Rounded 1c",
+                sans-serif;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.25em;
+        }
+
+        .character-deco,
+        .title-deco {
+            position: absolute;
+            z-index: 4;
+            pointer-events: none;
+            font-family:
+                "M PLUS Rounded 1c",
+                sans-serif;
+            font-weight: 900;
+            line-height: 1;
+            animation:
+                deco-float 1.1s ease-in-out infinite alternate;
+        }
+
+        .heart-left {
+            top: 25px;
+            left: -3px;
+            color: #f3a7b6;
+            font-size: 23px;
+        }
+
+        .spark-left {
+            top: 5px;
+            right: 2px;
+            color: #efc459;
+            font-size: 22px;
+        }
+
+        .heart-right {
+            top: 22px;
+            right: -2px;
+            color: #f3a7b6;
+            font-size: 23px;
+        }
+
+        .motion-right {
+            right: -5px;
+            bottom: 24px;
+            color: #78aaa0;
+            font-size: 25px;
+            transform: rotate(90deg);
+        }
+
+        .title-spark-left {
+            top: -15px;
+            left: 3px;
+            color: #efc459;
+            font-size: 23px;
+        }
+
+        .title-spark-right {
+            top: -8px;
+            right: 0;
+            color: #91d7df;
+            font-size: 20px;
+            animation-delay: 0.25s;
+        }
+
+        /* 大きすぎた集計欄を小さくする */
+        .summary {
+            position: relative;
+            margin-bottom: 22px;
+            padding: 16px 18px;
+            border-radius: 24px;
+            background:
+                linear-gradient(135deg,
+                    #ffffff,
+                    #effaf6);
+            box-shadow: 0 4px 0 #2f2a24;
+        }
+
+        .summary h2 {
+            margin-bottom: 12px;
+            color: #4d7771;
+            font-size: 18px;
+        }
+
+        .summary-item {
+            padding: 10px;
+            border: 2px solid #cae5df;
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        .summary-label {
+            font-size: 12px;
+        }
+
+        .summary-value {
+            font-size: 27px;
+        }
+
+        /* 記録カードを少し柔らかく */
+        .game-card {
+            border-radius: 23px;
+            box-shadow: 0 4px 0 #2f2a24;
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .game-card.drop {
+            transform: none;
+        }
+
+        .game-title {
+            min-height: 58px;
+            padding: 12px 8px;
+            font-size: 15px;
+        }
+
+        .game-body {
+            padding: 17px 14px 14px;
+        }
+
+        .main-label {
+            color: #655b51;
+            font-size: 12px;
+        }
+
+        .main-value {
+            font-size: 32px;
+        }
+
+        .detail {
+            color: #655b51;
+        }
+
+        .detail strong {
+            color: #2f2a24;
+        }
+
+        /* 動き */
+        @keyframes title-bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            45% {
+                transform: translateY(-8px);
+            }
+
+            60% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes deco-float {
+            from {
+                opacity: 0.72;
+                margin-top: 2px;
+            }
+
+            to {
+                opacity: 1;
+                margin-top: -4px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .title-board {
+                grid-template-columns:
+                    74px minmax(0, 1fr) 74px;
+                min-height: 118px;
+                padding-top: 8px;
+            }
+
+            .character-wrap {
+                width: 76px;
+                height: 96px;
+            }
+
+            .title-character {
+                width: 74px;
+                max-height: 90px;
+            }
+
+            .title-main {
+                font-size: clamp(23px, 7vw, 30px);
+                filter:
+                    drop-shadow(0 3px 0 #b8d9d2);
+            }
+
+            .title-char {
+                -webkit-text-stroke: 4px #44382f;
+            }
+
+            .subtitle {
+                margin-top: 10px;
+                font-size: 8px;
+                letter-spacing: 0.16em;
+            }
+
+            .heart-left,
+            .heart-right {
+                font-size: 17px;
+            }
+
+            .spark-left,
+            .title-spark-left,
+            .title-spark-right {
+                font-size: 16px;
+            }
+
+            .game-card.drop {
+                transform: none;
+            }
+
+            .game-title {
+                min-height: 100%;
+            }
+        }
+
+        .spark-right {
+            top: 4px;
+            left: 2px;
+            color: #efc459;
+            font-size: 22px;
+        }
+
+        .spark-right-2 {
+            top: -8px;
+            left: 27px;
+            color: #efc459;
+            font-size: 17px;
+            animation-delay: 0.22s;
+        }
+
+
+        .notice {
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            font-weight: 400;
+        }
+
+        .status {
+            font-weight: 400;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="stats-page">
+        <header class="title-board">
+            <div class="character-wrap character-wrap-left">
+                <img class="title-character" src="./images/giyu-happy.png?v=20260929-2" alt="">
+                <span class="character-deco heart-left">♥</span>
+                <span class="character-deco spark-left">✦</span>
+            </div>
+
+            <div class="title-copy">
+                <span class="title-deco title-spark-left">✦</span>
+
+
+                <h1 class="title-main" aria-label="みんなのおはぎ記録">
+                    <span class="title-line">
+                        <span class="title-char aqua">み</span>
+                        <span class="title-char mint">ん</span>
+                        <span class="title-char cream">な</span>
+                        <span class="title-char aqua">の</span>
+                    </span>
+
+                    <span class="title-line">
+                        <span class="title-char mint">お</span>
+                        <span class="title-char cream">は</span>
+                        <span class="title-char aqua">ぎ</span>
+                        <span class="title-char pink">記</span>
+                        <span class="title-char mint">録</span>
+                    </span>
+                </h1>
+
+                <p class="subtitle">OHAGI PLAY STATS</p>
+            </div>
+
+            <div class="character-wrap character-wrap-right">
+                <img class="title-character" src="./images/sanemi-happy.png?v=20260929-2" alt="">
+                <span class="character-deco heart-right">♥</span>
+                <span class="character-deco spark-right">✦</span>
+                <span class="character-deco spark-right-2">✦</span>
+            </div>
+        </header>
+
+
+        <section class="game-grid">
+            <article class="game-card escape">
+                <h2 class="game-title">
+                    🏃 おはぎから逃げろ！
+                </h2>
+
+                <div class="game-body">
+                    <p class="main-label">
+                        かわしたおはぎ
+                    </p>
+
+                    <p class="main-value">
+                        <span id="escapeTotal">0</span>
+                        <span class="main-unit">個</span>
+                    </p>
+
+                    <div class="detail-list">
+                        <div class="detail">
+                            <span>今日</span>
+                            <strong id="escapeToday">0個</strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>最高記録</span>
+                            <strong id="escapeHigh">0個</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="game-card drop">
+                <h2 class="game-title">
+                    🟤 おはぎDROP
+                </h2>
+
+                <div class="game-body">
+                    <p class="main-label">
+                        実弥が食べたおはぎ
+                    </p>
+
+                    <p class="main-value">
+                        約<span id="dropTotal">0</span>
+                        <span class="main-unit">個</span>
+                    </p>
+
+                    <div class="detail-list">
+                        <div class="detail">
+                            <span>今日の推定</span>
+                            <strong id="dropToday">
+                                約0個
+                            </strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>最高スコア</span>
+                            <strong id="dropHigh">
+                                0点
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="game-card kiss">
+                <h2 class="game-title">
+                    💋 おはぎKISS
+                </h2>
+
+                <div class="game-body">
+                    <p class="main-label">
+                        義勇から実弥へ
+                    </p>
+
+                    <p class="main-value">
+                        <span id="kissTotal">0</span>
+                        <span class="main-unit">回キス！</span>
+                    </p>
+
+                    <div class="detail-list">
+                        <div class="detail">
+                            <span>今日</span>
+                            <strong id="kissToday">
+                                0回
+                            </strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>最高記録</span>
+                            <strong id="kissHigh">
+                                0回
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <p class="notice">
+            ※ これまでにブルスカ連携登録された記録と、2026年9月29日以降の全プレイを集計しています。<br>
+            ※ おはぎDROPの個数は、累計スコアを
+            推定平均160点で割った目安です。
+        </p>
+
+        <div class="actions">
+            <button id="reload" class="button" type="button">
+                🔄 最新の記録に更新
+            </button>
+
+            <a class="button ranking-link" href="./">
+                🏆 ランキングを見る
+            </a>
+        </div>
+
+        <p id="status" class="status" role="status" aria-live="polite">
+            読み込み中…
+        </p>
+    </main>
+
+    <script>
+        const numberFormat =
+            new Intl.NumberFormat("ja-JP");
+
+        function formatNumber(value) {
+            return numberFormat.format(
+                Number(value) || 0
+            );
+        }
+
+        function setText(id, value) {
+            document.getElementById(id)
+                .textContent = value;
+        }
+
+        async function loadStats() {
+
+            const status =
+                document.getElementById("status");
+
+            const reload =
+                document.getElementById("reload");
+
+            status.textContent =
+                "読み込み中…";
+
+            reload.disabled = true;
+
+            try {
+
+                const response =
+                    await fetch(
+                        "./api/play-stats",
+                        {
+                            cache: "no-store"
+                        }
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "統計を取得できませんでした"
+                    );
+                }
+
+                const data =
+                    await response.json();
+
+                const escape =
+                    data.games.escape;
+
+                const drop =
+                    data.games.drop;
+
+                const kiss =
+                    data.games.kiss;
+
+                const totalPlays =
+                    escape.plays +
+                    drop.plays +
+                    kiss.plays;
+
+                const todayPlays =
+                    escape.todayPlays +
+                    drop.todayPlays +
+                    kiss.todayPlays;
+
+                const dropEstimate =
+                    Math.floor(
+                        drop.totalScore / 160
+                    );
+
+                const dropTodayEstimate =
+                    Math.floor(
+                        drop.todayScore / 160
+                    );
+
+                setText(
+                    "totalPlays",
+                    formatNumber(totalPlays)
+                );
+
+                setText(
+                    "todayPlays",
+                    formatNumber(todayPlays)
+                );
+
+                setText(
+                    "escapeTotal",
+                    formatNumber(
+                        escape.totalScore
+                    )
+                );
+
+                setText(
+                    "escapeToday",
+                    formatNumber(
+                        escape.todayScore
+                    ) + "個"
+                );
+
+                setText(
+                    "escapeHigh",
+                    formatNumber(
+                        escape.highScore
+                    ) + "個"
+                );
+
+                setText(
+                    "dropTotal",
+                    formatNumber(
+                        dropEstimate
+                    )
+                );
+
+                setText(
+                    "dropToday",
+                    "約" +
+                    formatNumber(
+                        dropTodayEstimate
+                    ) +
+                    "個"
+                );
+
+                setText(
+                    "dropHigh",
+                    formatNumber(
+                        drop.highScore
+                    ) + "点"
+                );
+
+                setText(
+                    "kissTotal",
+                    formatNumber(
+                        kiss.totalScore
+                    )
+                );
+
+                setText(
+                    "kissToday",
+                    formatNumber(
+                        kiss.todayScore
+                    ) + "回"
+                );
+
+                setText(
+                    "kissHigh",
+                    formatNumber(
+                        kiss.highScore
+                    ) + "回"
+                );
+
+                const updated =
+                    new Date(
+                        data.updatedAt
+                    ).toLocaleString(
+                        "ja-JP"
+                    );
+
+                status.textContent =
+                    "最終更新 " + updated;
+
+            } catch (error) {
+
+                console.error(error);
+
+                status.textContent =
+                    "記録を読み込めませんでした。";
+            } finally {
+
+                reload.disabled = false;
+            }
+        }
+
+        document
+            .getElementById("reload")
+            .addEventListener(
+                "click",
+                loadStats
+            );
+
+        loadStats();
+    </script>
+</body>
+
+</html>
