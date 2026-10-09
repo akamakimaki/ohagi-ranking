@@ -201,12 +201,13 @@
 
         .title-char {
             display: inline-block;
-            -webkit-text-stroke: 6px #4b352c;
+            -webkit-text-stroke: 5px #44382f;
             paint-order: stroke fill;
             text-shadow:
-                0 3px 0 #ffffff,
-                0 7px 0 #4b352c,
-                0 10px 0 #e4c5b5;
+                1px 1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px -1px 0 #fff;
             transform-origin: center bottom;
         }
 
@@ -362,9 +363,16 @@
 
         .tabs {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
             margin-bottom: 20px;
+        }
+
+        /* スマホは2列×2段 */
+        @media (max-width: 700px) {
+            .tabs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
         .tab-button {
@@ -410,6 +418,14 @@
 
         #kissTab::before {
             content: "💋";
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 20px;
+            vertical-align: -2px;
+        }
+
+        #pushTab::before {
+            content: "💥";
             display: inline-block;
             margin-right: 10px;
             font-size: 20px;
@@ -784,12 +800,16 @@
                 おはぎKISS
             </button>
 
+            <button id="pushTab" class="tab-button" type="button">
+                おはぎPUSH
+            </button>
+
         </div>
 
 
         <div class="my-score-nav">
             <a class="stats-link" href="./stats.html">
-                📊 みんなのおはぎ記録
+                📊 みんなの記録
             </a>
 
             <button id="myScoreBtn" type="button">
@@ -824,6 +844,12 @@
                 <span class="game-return-arrow">›</span>
             </button>
 
+            <button id="backToPushBtn" class="game-return-button" type="button">
+                <span class="game-return-icon">🎮</span>
+                <span>おはぎを押しつけろ！をプレイ</span>
+                <span class="game-return-arrow">›</span>
+            </button>
+
         </div>
 
     </main>
@@ -841,6 +867,9 @@
         const kissTab =
             document.getElementById("kissTab");
 
+        const pushTab =
+            document.getElementById("pushTab");
+
         const backToEscapeBtn =
             document.getElementById("backToEscapeBtn");
 
@@ -849,6 +878,9 @@
 
         const backToKissBtn =
             document.getElementById("backToKissBtn");
+
+        const backToPushBtn =
+            document.getElementById("backToPushBtn");
 
         const myScoreBtn =
             document.getElementById("myScoreBtn");
@@ -869,7 +901,9 @@
                 : null;
 
         let currentGame =
-            ["escape", "drop", "kiss"].includes(params.get("game"))
+            ["escape", "drop", "kiss", "push"].includes(
+                params.get("game")
+            )
                 ? params.get("game")
                 : "escape";
 
@@ -912,6 +946,23 @@
                     "#おはぎKISS"
                 ].join("\n");
 
+            } else if (game === "push") {
+                sharePageUrl =
+                    "https://akamakimaki.github.io/ohagi-push/";
+
+                text = [
+                    `「おはぎを押しつけろ！」で${Number(score).toLocaleString()}点！`,
+                    "実弥をかわして、おはぎを食べさせろ！",
+                    "",
+                    sharePageUrl,
+                    "",
+                    "#おはぎを押しつけろ"
+                ].join("\n");
+
+            } else {
+                sharePageUrl =
+                    "https://ohagi-drop.makimaki-feed.net/share?score=" + score;
+
             } else {
                 sharePageUrl =
                     "https://ohagi-drop.makimaki-feed.net/share?score=" + score;
@@ -951,6 +1002,11 @@
             kissTab.classList.toggle(
                 "active",
                 game === "kiss"
+            );
+
+            pushTab.classList.toggle(
+                "active",
+                game === "push"
             );
         }
 
@@ -1255,6 +1311,12 @@
             loadRanking("kiss");
         });
 
+        pushTab.addEventListener("click", () => {
+            currentGame = "push";
+            updateGameReturnButton();
+            loadRanking("push");
+        });
+
         backToEscapeBtn.addEventListener(
             "click",
             () => {
@@ -1277,6 +1339,11 @@
                 "https://akamakimaki.github.io/ohagi-kiss/";
         });
 
+        backToPushBtn.addEventListener("click", () => {
+            window.location.href =
+                "https://akamakimaki.github.io/ohagi-push/";
+        });
+
         function updateGameReturnButton() {
 
             backToEscapeBtn.hidden =
@@ -1286,6 +1353,8 @@
                 currentGame !== "drop";
 
             backToKissBtn.hidden = currentGame !== "kiss";
+
+            backToPushBtn.hidden = currentGame !== "push";
         }
 
         updateGameReturnButton();

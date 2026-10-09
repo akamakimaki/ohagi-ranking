@@ -141,7 +141,7 @@
         .game-grid {
             display: grid;
             grid-template-columns:
-                repeat(3, minmax(0, 1fr));
+                repeat(4, minmax(0, 1fr));
             gap: 14px;
         }
 
@@ -171,6 +171,14 @@
 
         .kiss .game-title {
             background: #f9e4ed;
+        }
+
+        .push .game-title {
+            background: #dceff0;
+        }
+
+        .push .main-value {
+            color: #347f89;
         }
 
         .game-body {
@@ -788,7 +796,7 @@
                         </div>
 
                         <div class="detail">
-                            <span>最高記録</span>
+                            <span>1プレイ最高</span>
                             <strong id="escapeHigh">0個</strong>
                         </div>
                     </div>
@@ -819,7 +827,7 @@
                         </div>
 
                         <div class="detail">
-                            <span>最高スコア</span>
+                            <span>1プレイ最高</span>
                             <strong id="dropHigh">
                                 0点
                             </strong>
@@ -852,7 +860,7 @@
                         </div>
 
                         <div class="detail">
-                            <span>最高記録</span>
+                            <span>1プレイ最高</span>
                             <strong id="kissHigh">
                                 0回
                             </strong>
@@ -860,6 +868,40 @@
                     </div>
                 </div>
             </article>
+
+            <article class="game-card push">
+                <h2 class="game-title">
+                    💥 おはぎPUSH
+                </h2>
+
+                <div class="game-body">
+                    <p class="main-label">
+                        みんなの累計得点
+                    </p>
+
+                    <p class="main-value">
+                        <span id="pushTotal">0</span>
+                        <span class="main-unit">点</span>
+                    </p>
+
+                    <div class="detail-list">
+                        <div class="detail">
+                            <span>今日</span>
+                            <strong id="pushToday">
+                                0点
+                            </strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>1プレイ最高</span>
+                            <strong id="pushHigh">
+                                0点
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
         </section>
 
         <p class="notice">
@@ -873,8 +915,8 @@
                 🔄 最新の記録に更新
             </button>
 
-            <a class="button ranking-link" href="./">
-                🏆 ランキングを見る
+            <a class="button ranking-link" href="./?game=kiss&amp;view=mine">
+                👤 自分の記録
             </a>
         </div>
 
@@ -939,15 +981,20 @@
                 const kiss =
                     data.games.kiss;
 
+                const push =
+                    data.games.push;
+
                 const totalPlays =
                     escape.plays +
                     drop.plays +
-                    kiss.plays;
+                    kiss.plays +
+                    push.plays;
 
                 const todayPlays =
                     escape.todayPlays +
                     drop.todayPlays +
-                    kiss.todayPlays;
+                    kiss.todayPlays +
+                    push.todayPlays;
 
                 const dropEstimate =
                     Math.floor(
@@ -959,15 +1006,6 @@
                         drop.todayScore / 160
                     );
 
-                setText(
-                    "totalPlays",
-                    formatNumber(totalPlays)
-                );
-
-                setText(
-                    "todayPlays",
-                    formatNumber(todayPlays)
-                );
 
                 setText(
                     "escapeTotal",
@@ -1032,6 +1070,27 @@
                     formatNumber(
                         kiss.highScore
                     ) + "回"
+                );
+
+                setText(
+                    "pushTotal",
+                    formatNumber(
+                        push.totalScore
+                    )
+                );
+
+                setText(
+                    "pushToday",
+                    formatNumber(
+                        push.todayScore
+                    ) + "点"
+                );
+
+                setText(
+                    "pushHigh",
+                    formatNumber(
+                        push.highScore
+                    ) + "点"
                 );
 
                 const updated =

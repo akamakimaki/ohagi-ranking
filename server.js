@@ -77,7 +77,8 @@ db.exec(`
 const allowedGames = new Set([
     "escape",
     "drop",
-    "kiss"
+    "kiss",
+    "push"
 ]);
 
 const pendingScoreLogins =
@@ -354,7 +355,8 @@ app.get("/api/play-stats", (req, res) => {
     const stats = {
         escape: createEmptyStats(),
         drop: createEmptyStats(),
-        kiss: createEmptyStats()
+        kiss: createEmptyStats(),
+        push: createEmptyStats()
     };
 
     /*
